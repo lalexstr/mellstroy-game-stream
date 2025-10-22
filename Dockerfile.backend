@@ -1,6 +1,9 @@
 # Backend Dockerfile
 FROM node:18-alpine
 
+# Установка необходимых библиотек для Prisma
+RUN apk add --no-cache openssl
+
 # Установка рабочей директории
 WORKDIR /app
 
