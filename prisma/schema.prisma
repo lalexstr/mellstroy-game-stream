@@ -1,0 +1,102 @@
+// Prisma Schema для MellstroyVerse
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  avatar    String?
+  role      String   @default("user") // user, admin
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Поля для восстановления пароля
+  tempPassword     String?   // временный пароль
+  tempPasswordExp  DateTime? // срок действия временного пароля
+  mustChangePassword Boolean @default(false) // флаг обязательной смены пароля
+  
+  messages  Message[]
+  donations Donation[]
+  purchases Purchase[]
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  content   String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  
+  // Тип сообщения для определения реакции
+  type      String   @default("text") // text, donation, action
+}
+
+model Donation {
+  id        String   @id @default(uuid())
+  amount    Float
+  message   String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Trigger {
+  id          String   @id @default(uuid())
+  keyword     String   // ключевое слово для триггера
+  videoUrl    String   // путь к видео реакции
+  category    String   // angry, happy, donation, insult, etc.
+  priority    Int      @default(0) // приоритет при совпадении нескольких триггеров
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  
+  @@index([keyword])
+  @@index([category])
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String   // название товара
+  description String?  // описание
+  price       Float    // цена
+  image       String?  // ссылка на изображение
+  category    String   // yacht, car, tech, property, luxury, etc.
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  purchases   Purchase[]
+  
+  @@index([category])
+}
+
+model Purchase {
+  id          String   @id @default(uuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  quantity    Int      @default(1)
+  totalPrice  Float
+  createdAt   DateTime @default(now())
+  
+  @@index([productId])
+  @@index([userId])
+}
+
+model Settings {
+  id          String   @id @default(uuid())
+  key         String   @unique // mellstroy_balance, max_balance, etc.
+  value       String   // значение настройки
+  description String?
+  updatedAt   DateTime @updatedAt
+}
+
