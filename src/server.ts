@@ -82,7 +82,9 @@ export class Application {
 
   private setupMiddleware(): void {
     // CORS
-    const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173';
+    const corsOrigin = process.env.NODE_ENV === 'production' 
+      ? process.env.CORS_ORIGIN || '*' 
+      : process.env.CORS_ORIGIN || 'http://localhost:5173';
     this.app.use(cors({
       origin: corsOrigin,
       credentials: corsOrigin !== '*',
@@ -94,6 +96,10 @@ export class Application {
     
     // Static files - serve uploaded videos
     this.app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+    
+    // Serve frontend static files
+    const frontendPath = path.join(process.cwd(), 'frontend', 'mellstroy', 'out');
+    this.app.use(express.static(frontendPath));
   }
 
   private setupRoutes(): void {
@@ -122,6 +128,11 @@ export class Application {
       this.settingsController,
       this.authMiddleware
     ));
+
+    // SPA fallback - serve index.html for all non-API routes
+    this.app.get('*', (_req: Request, res: Response) => {
+      res.sendFile(path.join(process.cwd(), 'frontend', 'mellstroy', 'out', 'index.html'));
+    });
   }
 
   public async start(): Promise<void> {

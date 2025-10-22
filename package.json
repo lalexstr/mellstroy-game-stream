@@ -10,8 +10,13 @@
     "lint": "eslint . --ext .ts",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
     "db:seed": "ts-node prisma/seed.ts",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "deploy:backend": "./deploy-backend.sh",
+    "deploy:frontend": "./deploy-frontend.sh",
+    "deploy:all": "./deploy.sh all",
+    "setup:servers": "./setup-servers.sh"
   },
   "keywords": [
     "webrtc",
