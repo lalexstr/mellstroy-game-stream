@@ -13,8 +13,14 @@ RUN npm ci --only=production
 # Копирование исходного кода
 COPY . .
 
+# Установка всех зависимостей (включая dev)
+RUN npm install
+
 # Генерация Prisma клиента
 RUN npx prisma generate
+
+# Сборка проекта
+RUN npm run build
 
 # Создание пользователя для безопасности
 RUN addgroup -g 1001 -S nodejs
