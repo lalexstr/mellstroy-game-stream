@@ -4,13 +4,18 @@ export class EmailService {
   private transporter: nodemailer.Transporter;
 
   constructor() {
-    // Настройка для Gmail (можно изменить на другие провайдеры)
+    // Настройка для Gmail с портом 587 (TLS) - обходит блокировку 25/465 портов
     this.transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false, // true для 465, false для других портов
       auth: {
         user: process.env.EMAIL_USER || 'your-email@gmail.com',
         pass: process.env.EMAIL_PASS || 'your-app-password', // Используйте App Password для Gmail
       },
+      tls: {
+        rejectUnauthorized: false
+      }
     });
   }
 
